@@ -1,0 +1,5 @@
+name: sklearn-sfa
+dependencies:
+  - numpy
+  - scipy
+  - scikit-learn

@@ -1,0 +1,9 @@
+numpy
+scipy
+scikit-learn
+sphinx 
+sphinx-gallery 
+sphinx_rtd_theme 
+matplotlib 
+numpydoc 
+pillow
