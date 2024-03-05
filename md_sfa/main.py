@@ -126,13 +126,3 @@ class TrajProcessor():
 
     def dump_sfa_components(self, save_file : str):
         pickle.dump(self.res, save_file)
-
-# processor = TrajProccesor()
-
-# processor.load_trajectories('Data/', 'Data/protuse.pdb', atom_indices='resid 158 to 170')
-# processor.featurize(['chi1', 'chi2'], True)
-# processor.describe_features(True)
-# processor.dump_description("dfsincos.pkl")
-# processor.dump_featurized("featuressincos.pkl")
-# processor.run_sfa()
-# processor.create_plumed_file('158170.plumed')

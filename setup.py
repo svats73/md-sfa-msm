@@ -10,14 +10,10 @@ setup(
         'pandas',
         'pickle5',
         'mdtraj',
-        'msmbuilder2022'
     ],
     entry_points={
         'console_scripts': [
             'md-sfa=md_sfa.cli:cli',
         ],
     },
-    # entry_points='''
-    #     md-sfa=md-sfa.cli:cli
-    # ''',
 )
