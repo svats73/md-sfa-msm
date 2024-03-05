@@ -1,8 +1,0 @@
-numpy
-scipy
-scikit-learn
-mdtraj
-pandas
-pickle
-msmbuilder2022
-click
