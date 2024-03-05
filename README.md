@@ -41,9 +41,9 @@ The MD-SFA CLI tool supports various commands for processing and analyzing your 
 
 ### Featurizing Dihedrals
 
-``` md-sfa featurize --types TYPE1 TYPE2 --nosincos ```
+``` md-sfa featurize --types TYPE1 --types TYPE2 --nosincos ```
 
-- `--types`: Types of dihedrals to featurize. Can specify multiple types.
+- `--types`: Types of dihedrals to featurize. Can specify multiple types, such as chi1, chi2, phi, psi. `--types` must be put before each type input
 - `--nosincos`: Disables the sin/cos transformation if set.
 
 ### Describing Features
