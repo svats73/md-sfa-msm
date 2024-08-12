@@ -125,4 +125,6 @@ class TrajProcessor():
             plumed.write("\n")
 
     def dump_sfa_components(self, save_file : str):
-        pickle.dump(self.res, save_file)
+        with open(save_file, 'wb') as f:
+            pickle.dump(self.res, f)
+        #pickle.dump(self.res, save_file)
