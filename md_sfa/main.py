@@ -6,6 +6,7 @@ from pathlib import Path
 import pickle
 from msmbuilder.dataset import dataset
 from msmbuilder.featurizer import DihedralFeaturizer
+from Bio import PDB
 import sksfa
 
 class TrajProcessor():
@@ -128,3 +129,41 @@ class TrajProcessor():
         with open(save_file, 'wb') as f:
             pickle.dump(self.res, f)
         #pickle.dump(self.res, save_file)
+
+    def parse_plumed_input(self, plumed_file):
+        with open(plumed_file, 'r') as f:
+            plumed_content = f.read()
+        
+        # Extract variable names and coefficients
+        var_pattern = r'ARG=(.*?)\\s+COEFFICIENTS=(.*?)\\s+PERIODIC'
+        match = re.search(var_pattern, plumed_content, re.DOTALL)
+        if not match:
+            raise ValueError("Could not parse PLUMED input")
+        
+        variables = match.group(1).split(',')
+        coefficients = [float(c) for c in match.group(2).split(',')]
+        
+        return variables, coefficients
+
+    def calculate_bfactors(self, variables, coefficients, pdb_file):
+        parser = PDB.PDBParser()
+        structure = parser.get_structure('X', pdb_file)
+        
+        for model in structure:
+            for chain in model:
+                for residue in chain:
+                    for atom in residue:
+                        # Apply some transformation to the B-factors (this is an example)
+                        atom.bfactor = sum(coefficients)  # Simplified for example purposes
+        
+        return structure
+
+    def save_pdb(self, structure, output_file):
+        io = PDB.PDBIO()
+        io.set_structure(structure)
+        io.save(output_file)
+
+    def process_bfactor(self, plumed_file, pdb_input, pdb_output):
+        variables, coefficients = self.parse_plumed_input(plumed_file)
+        structure = self.calculate_bfactors(variables, coefficients, pdb_input)
+        self.save_pdb(structure, pdb_output)
