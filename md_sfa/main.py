@@ -8,6 +8,7 @@ from msmbuilder.dataset import dataset
 from msmbuilder.featurizer import DihedralFeaturizer
 from Bio import PDB
 import sksfa
+import re
 
 class TrajProcessor():
 
