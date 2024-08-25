@@ -135,7 +135,7 @@ class TrajProcessor():
             plumed_content = f.read()
         
         # Extract variable names and coefficients
-        var_pattern = r'ARG=(.*?)\\s+COEFFICIENTS=(.*?)\\s+PERIODIC'
+        var_pattern = r'ARG=(.*?)\s+COEFFICIENTS=(.*?)\s+PERIODIC'
         match = re.search(var_pattern, plumed_content, re.DOTALL)
         if not match:
             raise ValueError("Could not parse PLUMED input")
@@ -143,27 +143,40 @@ class TrajProcessor():
         variables = match.group(1).split(',')
         coefficients = [float(c) for c in match.group(2).split(',')]
         
-        return variables, coefficients
+        return dict(zip(variables, coefficients))
 
-    def calculate_bfactors(self, variables, coefficients, pdb_file):
+    def combine_weights(self, weights):
+        combined_weights = {}
+        for var, weight in weights.items():
+            parts = var.split('_')
+            residue = int(parts[-1])
+            if residue not in combined_weights:
+                combined_weights[residue] = 0
+            combined_weights[residue] += weight ** 2  # Sum of squared weights
+        
+        # Take square root to normalize
+        for residue in combined_weights:
+            combined_weights[residue] = (combined_weights[residue] / 4) ** 0.5
+        
+        return combined_weights
+    
+    def apply_weights_to_pdb(self, pdb_file, weights, output_file):
         parser = PDB.PDBParser()
-        structure = parser.get_structure('X', pdb_file)
+        structure = parser.get_structure("protein", pdb_file)
         
         for model in structure:
             for chain in model:
                 for residue in chain:
-                    for atom in residue:
-                        # Apply some transformation to the B-factors (this is an example)
-                        atom.bfactor = sum(coefficients)  # Simplified for example purposes
+                    res_id = residue.id[1]
+                    if res_id in weights:
+                        for atom in residue:
+                            atom.set_bfactor(weights[res_id])
         
-        return structure
-
-    def save_pdb(self, structure, output_file):
         io = PDB.PDBIO()
         io.set_structure(structure)
         io.save(output_file)
-
+    
     def process_bfactor(self, plumed_file, pdb_input, pdb_output):
-        variables, coefficients = self.parse_plumed_input(plumed_file)
-        structure = self.calculate_bfactors(variables, coefficients, pdb_input)
-        self.save_pdb(structure, pdb_output)
+        weights = self.parse_plumed_input(plumed_file)
+        combined_weights = self.combine_weights(weights)
+        self.apply_weights_to_pdb(pdb_input, combined_weights, pdb_output)
