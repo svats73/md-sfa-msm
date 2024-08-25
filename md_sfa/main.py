@@ -132,7 +132,7 @@ class TrajProcessor():
             pickle.dump(self.res, f)
         #pickle.dump(self.res, save_file)
 
-    def parse_plumed_input(plumed_file):
+    def parse_plumed_input(self, plumed_file):
         with open(plumed_file, 'r') as f:
             plumed_content = f.read()
         
@@ -147,7 +147,7 @@ class TrajProcessor():
         
         return dict(zip(variables, coefficients))
 
-    def combine_weights(weights):
+    def combine_weights(self, weights):
         combined_weights = {}
         angle_types = set()
         specific_angles = set()
@@ -177,7 +177,7 @@ class TrajProcessor():
     
         return combined_weights, angle_types, specific_angles
     
-    def apply_weights_to_pdb(pdb_file, weights, output_file):
+    def apply_weights_to_pdb(self, pdb_file, weights, output_file):
         parser = PDB.PDBParser()
         structure = parser.get_structure("protein", pdb_file)
         
