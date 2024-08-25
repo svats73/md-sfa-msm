@@ -131,7 +131,7 @@ class TrajProcessor():
             pickle.dump(self.res, f)
         #pickle.dump(self.res, save_file)
 
-    def parse_plumed_input(self, plumed_file):
+    def parse_plumed_input(plumed_file):
         with open(plumed_file, 'r') as f:
             plumed_content = f.read()
         
@@ -146,22 +146,37 @@ class TrajProcessor():
         
         return dict(zip(variables, coefficients))
 
-    def combine_weights(self, weights):
+    def combine_weights(weights):
         combined_weights = {}
-        for var, weight in weights.items():
-            parts = var.split('_')
-            residue = int(parts[-1])
-            if residue not in combined_weights:
-                combined_weights[residue] = 0
-            combined_weights[residue] += weight ** 2  # Sum of squared weights
-        
-        # Take square root to normalize
-        for residue in combined_weights:
-            combined_weights[residue] = (combined_weights[residue] / 4) ** 0.5
-        
-        return combined_weights
+        angle_types = set()
+        specific_angles = set()
     
-    def apply_weights_to_pdb(self, pdb_file, weights, output_file):
+        # Determine which angle types are present
+        for var in weights.keys():
+            parts = var.split('_')
+            if len(parts) >= 3 and parts[0] == 'meanfree':
+                angle_type = parts[1]
+                specific_angle = parts[2]
+                residue = int(parts[-1])
+                angle_types.add(angle_type)
+                specific_angles.add(specific_angle)
+                
+                if residue not in combined_weights:
+                    combined_weights[residue] = {}
+                
+                if specific_angle not in combined_weights[residue]:
+                    combined_weights[residue][specific_angle] = 0
+                
+                combined_weights[residue][specific_angle] += weights[var] ** 2
+    
+        # Calculate the combined weight for each residue
+        for residue in combined_weights:
+            total_weight = sum(combined_weights[residue].values())
+            combined_weights[residue] = math.sqrt(total_weight)
+    
+        return combined_weights, angle_types, specific_angles
+    
+    def apply_weights_to_pdb(pdb_file, weights, output_file):
         parser = PDB.PDBParser()
         structure = parser.get_structure("protein", pdb_file)
         
