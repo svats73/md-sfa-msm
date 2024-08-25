@@ -95,5 +95,14 @@ def dump_sfa_components(save_file):
     processor_instance.dump_sfa_components(save_file)
     save_processor_instance(processor_instance)
 
+@cli.command()
+@click.option('--dat_file', type=click.Path(exists=True))
+@click.option('--pdb_input', type=click.Path(exists=True))
+@click.option('--pdb_output', type=click.Path())
+def plumed_bfactor(dat_file, pdb_input, pdb_output):
+    """Calculate B-factors using PLUMED input and PDB files."""
+    processor = TrajProcessor()
+    processor.process_bfactor(dat_file, pdb_input, pdb_output)
+
 if __name__ == '__main__':
     cli()
