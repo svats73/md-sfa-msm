@@ -9,6 +9,7 @@ from msmbuilder.featurizer import DihedralFeaturizer
 from Bio import PDB
 import sksfa
 import re
+import math
 
 class TrajProcessor():
 
