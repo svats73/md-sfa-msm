@@ -10,6 +10,7 @@ setup(
         'pandas',
         'pickle5',
         'mdtraj',
+        'biopython',
     ],
     entry_points={
         'console_scripts': [
