@@ -144,8 +144,8 @@ class TrajProcessor():
         
         variables = match.group(1).split(',')
         coefficients = [float(c) for c in match.group(2).split(',')]
-        
-        return dict(zip(variables, coefficients))
+    
+    return dict(zip(variables, coefficients))
 
     def combine_weights(self, weights):
         combined_weights = {}
@@ -187,7 +187,6 @@ class TrajProcessor():
                     res_id = residue.id[1]
                     if res_id in weights:
                         for atom in residue:
-                            print(weights[res_id])
                             atom.set_bfactor(weights[res_id])
         
         io = PDB.PDBIO()
@@ -196,5 +195,5 @@ class TrajProcessor():
     
     def process_bfactor(self, plumed_file, pdb_input, pdb_output):
         weights = self.parse_plumed_input(plumed_file)
-        combined_weights = self.combine_weights(weights)
-        self.apply_weights_to_pdb(pdb_input, combined_weights, pdb_output)
+        combined_weights, angle_types, specific_angles = self.combine_weights(weights)
+        apply_weights_to_pdb(pdb_input, combined_weights, pdb_output)
