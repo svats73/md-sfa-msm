@@ -145,7 +145,7 @@ class TrajProcessor():
         variables = match.group(1).split(',')
         coefficients = [float(c) for c in match.group(2).split(',')]
     
-    return dict(zip(variables, coefficients))
+        return dict(zip(variables, coefficients))
 
     def combine_weights(self, weights):
         combined_weights = {}
