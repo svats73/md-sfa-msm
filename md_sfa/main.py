@@ -187,6 +187,7 @@ class TrajProcessor():
                     res_id = residue.id[1]
                     if res_id in weights:
                         for atom in residue:
+                            print(weights[res_id])
                             atom.set_bfactor(weights[res_id])
         
         io = PDB.PDBIO()
