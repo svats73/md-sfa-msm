@@ -196,4 +196,4 @@ class TrajProcessor():
     def process_bfactor(self, plumed_file, pdb_input, pdb_output):
         weights = self.parse_plumed_input(plumed_file)
         combined_weights, angle_types, specific_angles = self.combine_weights(weights)
-        apply_weights_to_pdb(pdb_input, combined_weights, pdb_output)
+        self.apply_weights_to_pdb(pdb_input, combined_weights, pdb_output)
