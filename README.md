@@ -88,6 +88,14 @@ The MD-SFA CLI tool supports various commands for processing and analyzing your 
 
 - `--save_file`: File path to save the SFA components.
 
+### Dumping SFA Weights as B-Factors
+
+``` md-sfa plumed-bfactor --dat_file FILE --pdb_input PDB_INPUT_FILE --pdb_output PDB_OUTPUT_FILE ```
+
+- `--dat_file`: File path containing saved SFA components.
+- `--pdb_input`: File path to PDB on which SFA weights will be dumped.
+- `--pdb_input`: Output filename for PDB with added SFA weights.
+
 ### Restarting the Tool
 
 To clear the current state and start fresh:
