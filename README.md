@@ -96,6 +96,8 @@ The MD-SFA CLI tool supports various commands for processing and analyzing your 
 - `--pdb_input`: File path to PDB on which SFA weights will be dumped.
 - `--pdb_input`: Output filename for PDB with added SFA weights.
 
+![ga](/sfa-weights.png)
+
 ### Restarting the Tool
 
 To clear the current state and start fresh:
