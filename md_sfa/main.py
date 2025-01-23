@@ -4,12 +4,16 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 import pickle
+import msmbuilder
 from msmbuilder.dataset import dataset
 from msmbuilder.featurizer import DihedralFeaturizer
+from msmbuilder import cluster
 from Bio import PDB
+from sklearn.svm import LinearSVC
 import sksfa
 import re
 import math
+import random
 
 class TrajProcessor():
 
@@ -21,6 +25,7 @@ class TrajProcessor():
         self.nosincos : bool = False
         self.featurizer : DihedralFeaturizer = None
         self.featurized_top : pd.DataFrame = None
+        self.trajectory_lengths : list(int) = None
         self.diheds : list(np.ndarray) = None
         self.featurizer_nosincos : DihedralFeaturizer = None
         self.featurized_top_nosincos : pd.DataFrame = None
@@ -38,6 +43,7 @@ class TrajProcessor():
             self.topology = md.load(topology_file, atom_indices = selection)
             xtc_files = str(path_to_trajectories) + "/*.xtc"
             self.dataset = dataset(path=xtc_files,fmt='mdtraj',topology=topology_file, stride=stride, atom_indices=selection)
+            self.trajectory_lengths = [self.dataset[i].n_frames for i in range(len(self.dataset))]
         except Exception as e:
             print(f"{type(e).__name__} at line {e.__traceback__.tb_lineno} of {__file__}: {e}")
 
@@ -132,6 +138,97 @@ class TrajProcessor():
             pickle.dump(self.res, f)
         #pickle.dump(self.res, save_file)
 
+    def cluster(self, method : str = 'kmeans', n_clusters = None):
+        split_res = []
+        i = 0
+        for traj_length in self.trajectory_lengths:
+            split_res.append(self.res[i:i + traj_length])
+            i += traj_length
+        if method == 'kmeans':
+            clusterer = cluster.KMeans(n_clusters=n_clusters)
+            self.clustered_trajs = clusterer.fit_transform(split_res)
+        elif method == 'kcenters':
+            clusterer = cluster.KCenters(n_clusters=n_clusters)
+            self.clustered_trajs = clusterer.fit_transform(split_res)
+        elif method == 'gmm':
+            clusterer = cluster.GMM()
+            self.clustered_trajs = clusterer.fit_transform(split_res)
+
+    def dump_clusters(self, num_samples : int):
+        cluster_dict = {}
+        for traj_num, traj in enumerate(self.clustered_trajs):
+            for frame_num, cluster_id in enumerate(traj):
+                if cluster_id not in cluster_dict:
+                    cluster_dict[cluster_id] = []
+                cluster_dict[cluster_id].append((traj_num, frame_num))
+
+        if not os.path.exists(f"./Clusters"):
+                    os.makedirs(f"./Clusters")            
+        for cluster_num, frames in cluster_dict.items():
+            try:
+                sampled_frames = random.sample(frames, num_samples)
+            except:
+                sampled_frames = random.sample(frames, len(frames))    
+            for traj_num, frame_num in sampled_frames:
+                traj = self.dataset[traj_num]
+                frame = traj[frame_num]
+                frame.save(f"./Clusters/cluster{cluster_num}-run{traj_num}-frame{frame_num}.pdb")
+
+        
+    def classify(self, ensemble_one_path : str, ensemble_two_path : str, featurized_df_path : str):
+        e1 = msmbuilder.utils.load(ensemble_one_path)
+        e2 = msmbuilder.utils.load(ensemble_two_path)
+        e1_xx = np.concatenate(e1)
+        e2_xx = np.concatenate(e2)
+        if e1_xx.shape != e2_xx.shape:
+            raise ValueError("Ensembles must have the same number of features")
+        combined_xx = [e1_xx, e2_xx]
+        train_X = np.vstack(combined_xx)
+        train_Y=np.concatenate([np.zeros(len(combined_xx[0])),np.ones(len(combined_xx[0]))])
+        clf = LinearSVC(penalty="l2",C=1,dual=False)
+        clf.fit(train_X, train_Y)
+        self.classifier_features_and_weights = pd.DataFrame(pickle.load(open(featurized_df_path, 'rb')))
+        classifier_weights = clf.coef_.T
+        self.classifier_features_and_weights['weights'] = classifier_weights
+
+    def classifier_plumed(self, plumed_filename : str):
+        plumed = open(plumed_filename, "w")
+
+        for index, row in self.classifier_features_and_weights.iterrows():
+            if row['otherinfo'] == "sin":
+                feat_name = row['featuregroup'] + "-" + str(row['resseqs'][0])
+                feat_label = row['featuregroup'] + "_" + str(row['resseqs'][0])
+                plumed.write("TORSION ATOMS=@" + feat_name + " LABEL=" + feat_label + "\n")
+                #ARG += feat_label + "," if index != (len(self.classifier_features_and_weights) - 1) else feat_label
+
+        plumed.write("\n")
+
+        ARG = "ARG="
+
+        PERIODIC = "PERIODIC=NO"
+
+        for index, row in self.classifier_features_and_weights.iterrows():
+            feat_label = row['featuregroup'] + "_" + str(row['resseqs'][0])
+            MATHEVAL_ARG = "MATHEVAL ARG=" + feat_label
+            FUNC = "FUNC=" + row['otherinfo'] + "(x)" 
+            LABEL = "LABEL=" + row['otherinfo'] + "_" + feat_label
+            ARG += row['otherinfo'] + "_" + feat_label + "," if index != (len(self.classifier_features_and_weights) - 1) else row['otherinfo'] + "_" + feat_label
+            plumed.write(MATHEVAL_ARG + " " + FUNC + " " + LABEL + " " + PERIODIC + "\n")
+        
+        plumed.write("\n")
+
+        COMBINE_LABEL = "COMBINE LABEL=classifier"
+        COEFFICIENTS = "COEFFICIENTS="
+        for index, row in self.classifier_features_and_weights.iterrows():
+            COEFFICIENTS += str(row['weights']) + "," if index != (len(self.classifier_features_and_weights) - 1) else str(row['weights'])
+        plumed.write(COMBINE_LABEL + "\n")
+        plumed.write(ARG + "\n")
+        plumed.write(COEFFICIENTS + " " + PERIODIC + "\n")
+        plumed.write("\n")
+
+        plumed.close()
+
+    
     def parse_plumed_input(self, plumed_file):
         with open(plumed_file, 'r') as f:
             plumed_content = f.read()

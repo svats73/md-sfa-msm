@@ -85,6 +85,40 @@ def create_plumed_file(plumed_filename):
     save_processor_instance(processor_instance)
 
 @cli.command()
+@click.option('--algorithm', default='kmeans', help='Clustering algorithm to use.')
+@click.option('--n_clusters', default=100, help='Number of clusters for algorithm (if applicable).')
+def cluster(algorithm, n_clusters):
+    processor_instance = load_processor_instance()
+    if algorithm == 'GMM':
+        processor_instance.cluster(algorithm)
+    else:
+        processor_instance.cluster(algorithm, n_clusters)
+    save_processor_instance(processor_instance)
+
+@cli.command()
+@click.option('--num_samples', default=3, help='Number of samples to draw from clustering.')
+def dump_clusters(num_samples):
+    processor_instance = load_processor_instance()
+    processor_instance.dump_clusters(num_samples)
+    save_processor_instance(processor_instance)
+
+@cli.command()
+@click.option('--ensemble_one', type=click.Path(), help='Path to the first ensemble file.')
+@click.option('--ensemble_two', type=click.Path(), help='Path to the second ensemble file.')
+@click.option('--ensemble_features', type=click.Path(), help='Path to the ensemble features file.')
+def classify(ensemble_one, ensemble_two, ensemble_features):
+    processor_instance = load_processor_instance()
+    processor_instance.classify(ensemble_one, ensemble_two, ensemble_features)
+    save_processor_instance(processor_instance)
+
+@cli.command()
+@click.option('--plumed_filename', type=click.Path(), help='Output path of the PLUMED file.')
+def create_classifier_plumed(plumed_filename):
+    processor_instance = load_processor_instance()
+    processor_instance.classifier_plumed(plumed_filename)
+    save_processor_instance(processor_instance)
+
+@cli.command()
 def restart():
     delete_processor_instance()
 
