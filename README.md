@@ -109,7 +109,7 @@ The MD-SFA CLI tool supports various commands for processing and analyzing your 
 - `--ensemble_two`: Path to second featurized ensemble of trajectories
 - `--ensemble_features`: Path to dataframe which contains featurization information for the given ensembles
 
-### Classify ensembles
+### Dump classified ensembles as a plumed file
 
 ``` md-sfa create-classifier-plumed --plumed_filename FILENAME ```
 
