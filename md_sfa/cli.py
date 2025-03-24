@@ -4,6 +4,8 @@ import pickle
 from md_sfa.main import TrajProcessor
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+from timelaggedcv import TimeLaggedCV
 
 # Define helper functions for saving, loading, and deleting the TrajProcessor instance
 def save_processor_instance(processor_instance, file_path='processor_instance.pkl'):
@@ -117,6 +119,77 @@ def create_classifier_plumed(plumed_filename):
     processor_instance = load_processor_instance()
     processor_instance.classifier_plumed(plumed_filename)
     save_processor_instance(processor_instance)
+
+@cli.command()
+@click.option('--pickle_descriptor', multiple=True, default=['.','.'], help='One or more file paths for the pickle descriptor (e.g., file1.pkl file2.pkl ...)')
+@click.option('--pickle_features', multiple=True, default=['.','.'],help='One or more file paths for the pickle features (e.g., file1.pkl file2.pkl ...)')
+@click.option('--tau', type=int, default=10, show_default=True, help='Time lag parameter (integer)')
+def train_vae(pickle_descriptor, pickle_features, tau):
+    options = TimeLaggedCV.DEFAULT
+    options['create_dataset_options']['pickle_descriptor'] = list(pickle_descriptor)
+    options['create_dataset_options']['pickle_features'] = list(pickle_features)
+    options['dataset']['tau'] = tau
+    model = TimeLaggedCV(options)
+    model.run()
+
+@cli.command()
+@click.option(
+    '--pickle_descriptor',
+    multiple=True,
+    required=True,
+    help='Space-separated list of paths for pickle_descriptor'
+)
+@click.option(
+    '--pickle_features',
+    multiple=True,
+    required=True,
+    help='Space-separated list of paths for pickle_features'
+)
+@click.option(
+    '--tau',
+    type=int,
+    required=True,
+    help='Integer value for tau'
+)
+@click.option(
+    '--model_path',
+    required=True,
+    help='Path to model file (e.g. model_final.pt or model.pt)'
+)
+@click.option(
+    '--teacher_flag',
+    is_flag=True,
+    help='Set this flag if teacher mode is desired (default is False)'
+)
+def predict_vae(pickle_descriptor, pickle_features, tau, model_path, teacher_flag):
+    options = TimeLaggedCV.DEFAULT
+    options['create_dataset_options']['pickle_descriptor'] = list(pickle_descriptor)
+    options['create_dataset_options']['pickle_features'] = list(pickle_features)
+    options['dataset']['tau'] = tau
+    options['general']['teacher'] = teacher_flag
+
+    tlcv = TimeLaggedCV(options)
+    model = tlcv.get_model()
+
+    if not teacher_flag:
+        model.load(model_path)
+    else:
+        model.load(model_path)
+
+    cv_space = model.estimate_cv_from_dataset(tlcv.dataset_weight, batchsize=100000)
+    list_cv = np.split(cv_space, tlcv.dataset_weight.total_length)
+
+    if not teacher_flag:
+        np.savez('cv_pred.npz', *list_cv)
+        print('Saved teacher prediction')
+    else:
+        np.savez('cv_pred_student.npz', *list_cv)
+        print('Saved student prediction')
+
+    skip = 1
+    for start, end in zip(tlcv.dataset_weight.total_length[:-1], tlcv.dataset_weight.total_length[1:]):
+        plt.plot(*cv_space[start:end:skip].T, '.')
+    plt.show()
 
 @cli.command()
 def restart():
