@@ -2,13 +2,20 @@ from setuptools import setup, find_packages
 
 setup(
     name='md-sfa',
-    version='0.2.0',
+    version='0.3.0',
     packages=find_packages(),
     install_requires=[
         'click',
-        'numpy',
+        'numpy<2',
         'pandas',
         #'pickle5',
+        'addict',
+        'h5py',
+        'torch',
+        'lightning',
+        'ruamel.yaml',
+        'matplotlib',
+        'parmed',
         'mdtraj',
         'biopython',
         'scikit-learn',

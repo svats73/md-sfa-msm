@@ -1,4 +1,5 @@
 import click
+import copy
 from pathlib import Path
 import pickle
 from md_sfa.main import TrajProcessor
@@ -6,6 +7,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from timelaggedcv import TimeLaggedCV
+from md_sfa.utils import parse_extra_args
 
 # Define helper functions for saving, loading, and deleting the TrajProcessor instance
 def save_processor_instance(processor_instance, file_path='processor_instance.pkl'):
@@ -120,19 +122,28 @@ def create_classifier_plumed(plumed_filename):
     processor_instance.classifier_plumed(plumed_filename)
     save_processor_instance(processor_instance)
 
-@cli.command()
+@cli.command(context_settings=dict(
+    ignore_unknown_options=True,
+    allow_extra_args=True,
+))
 @click.option('--pickle_descriptor', multiple=True, default=['.','.'], help='One or more file paths for the pickle descriptor (e.g., file1.pkl file2.pkl ...)')
 @click.option('--pickle_features', multiple=True, default=['.','.'],help='One or more file paths for the pickle features (e.g., file1.pkl file2.pkl ...)')
 @click.option('--tau', type=int, default=10, show_default=True, help='Time lag parameter (integer)')
-def train_vae(pickle_descriptor, pickle_features, tau):
-    options = TimeLaggedCV.DEFAULT
+@click.pass_context
+def train_vae(ctx, pickle_descriptor, pickle_features, tau):
+    #options = TimeLaggedCV.DEFAULT
+    options = copy.deepcopy(TimeLaggedCV.DEFAULT)
     options['create_dataset_options']['pickle_descriptor'] = list(pickle_descriptor)
     options['create_dataset_options']['pickle_features'] = list(pickle_features)
     options['dataset']['tau'] = tau
+    parse_extra_args(options, ctx.args)
     model = TimeLaggedCV(options)
     model.run()
 
-@cli.command()
+@cli.command(context_settings=dict(
+    ignore_unknown_options=True,
+    allow_extra_args=True,
+))
 @click.option(
     '--pickle_descriptor',
     multiple=True,
@@ -161,20 +172,26 @@ def train_vae(pickle_descriptor, pickle_features, tau):
     is_flag=True,
     help='Set this flag if teacher mode is desired (default is False)'
 )
-def predict_vae(pickle_descriptor, pickle_features, tau, model_path, teacher_flag):
-    options = TimeLaggedCV.DEFAULT
+@click.pass_context
+def predict_vae(ctx, pickle_descriptor, pickle_features, tau, model_path, teacher_flag):
+    #options = TimeLaggedCV.DEFAULT
+    options = copy.deepcopy(TimeLaggedCV.DEFAULT)
     options['create_dataset_options']['pickle_descriptor'] = list(pickle_descriptor)
     options['create_dataset_options']['pickle_features'] = list(pickle_features)
     options['dataset']['tau'] = tau
     options['general']['teacher'] = teacher_flag
 
+    parse_extra_args(options, ctx.args)
+
     tlcv = TimeLaggedCV(options)
     model = tlcv.get_model()
 
-    if not teacher_flag:
-        model.load(model_path)
-    else:
-        model.load(model_path)
+    model.load(model_path)
+
+    # if not teacher_flag:
+    #     model.load(model_path)
+    # else:
+    #     model.load(model_path)
 
     cv_space = model.estimate_cv_from_dataset(tlcv.dataset_weight, batchsize=100000)
     list_cv = np.split(cv_space, tlcv.dataset_weight.total_length)
