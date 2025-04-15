@@ -115,6 +115,28 @@ The MD-SFA CLI tool supports various commands for processing and analyzing your 
 
 - `--plumed_filename`: File path to save the generated PLUMED file.
 
+### Train VAE 
+
+``` md-sfa train-vae --pickle_descriptor PICKLE_DESCRIPTOR_FILE --pickle_features PICKLE_FEATURES_FILE --pickle_features --tau TAU_VALUE ```
+
+- `--pickle_descriptor`: One or more file paths to pickles used as descriptors for the system
+- `--pickle_features`: One or more file paths to pickles used as features for the system
+- `--tau`: Time lag parameter (integer)
+
+NOTE: you can add multiple pickle descriptors/features by adding additional `--pickle_descriptor` flags before additional paths to descriptors/features, ensure that the ordering is the same for descriptors and features 
+
+### Predict VAE 
+
+``` md-sfa train-vae --pickle_descriptor PICKLE_DESCRIPTOR_FILE --pickle_features PICKLE_FEATURES_FILE --pickle_features --tau TAU_VALUE --model_path PATH_TO_TRAINED_MODEL --teacher_flag (OPTIONAL)```
+
+- `--pickle_descriptor`: One or more file paths to pickles used as descriptors for the system
+- `--pickle_features`: One or more file paths to pickles used as features for the system
+- `--tau`: Time lag parameter (integer)
+- `--model_path`: Path to model trained on given descriptors and features
+- `--teacher_flag` : Optional flag to make predictions with teacher mode
+
+NOTE: you can add multiple pickle descriptors/features by adding additional `--pickle_descriptor` flags before additional paths to descriptors/features, ensure that the ordering is the same for descriptors and features 
+
 
 ### Dumping SFA Weights as B-Factors
 

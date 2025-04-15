@@ -163,7 +163,7 @@ class TrajProcessor():
                 cluster_dict[cluster_id].append((traj_num, frame_num))
 
         if not os.path.exists(f"./Clusters"):
-                    os.makedirs(f"./Clusters")            
+            os.makedirs(f"./Clusters")            
         for cluster_num, frames in cluster_dict.items():
             try:
                 sampled_frames = random.sample(frames, num_samples)
