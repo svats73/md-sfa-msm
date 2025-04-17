@@ -1,5 +1,19 @@
 # MD-SFA: Molecular Dynamics Slow Feature Analysis CLI Tool
 
+MDML is a software suite for dimensionality reduction, featurization, and analysis of Molecular Dynamics data. Our contributors are Shray Vats, Andreas Mardt, and Soumendranath Bhakat. The main point of contact for this repo is Shray Vats.
+
+## Reference
+
+If you use ```mdml``` for published research, make sure to cite us:
+
+Generalizable Protein Dynamics in Serine-Threonine Kinases: Physics is the key
+Soumendranath Bhakat, Shray Vats, Andreas Mardt, Alexei Degterev
+bioRxiv 2025.03.06.641878; doi: https://doi.org/10.1101/2025.03.06.641878
+
+Vats S, Bobrovs R, Söderhjelm P, Bhakat S (2024) 
+AlphaFold-SFA: Accelerated sampling of cryptic pocket opening, protein-ligand binding and allostery by AlphaFold, slow feature analysis and metadynamics. 
+PLOS ONE 19(8): e0307226. https://doi.org/10.1371/journal.pone.0307226
+
 ## Overview
 
 MD-SFA is a powerful command-line interface (CLI) tool designed for the analysis of molecular dynamics (MD) simulations. Leveraging the capabilities of the `md_sfa` library, MD-SFA facilitates the loading of MD trajectory data, the featurization of trajectories, the execution of Slow Feature Analysis (SFA), and the creation of PLUMED files for biasing simulations based on SFA components. 
@@ -114,28 +128,6 @@ The MD-SFA CLI tool supports various commands for processing and analyzing your 
 ``` md-sfa create-classifier-plumed --plumed_filename FILENAME ```
 
 - `--plumed_filename`: File path to save the generated PLUMED file.
-
-### Train VAE 
-
-``` md-sfa train-vae --pickle_descriptor PICKLE_DESCRIPTOR_FILE --pickle_features PICKLE_FEATURES_FILE --pickle_features --tau TAU_VALUE ```
-
-- `--pickle_descriptor`: One or more file paths to pickles used as descriptors for the system
-- `--pickle_features`: One or more file paths to pickles used as features for the system
-- `--tau`: Time lag parameter (integer)
-
-NOTE: you can add multiple pickle descriptors/features by adding additional `--pickle_descriptor` flags before additional paths to descriptors/features, ensure that the ordering is the same for descriptors and features 
-
-### Predict VAE 
-
-``` md-sfa train-vae --pickle_descriptor PICKLE_DESCRIPTOR_FILE --pickle_features PICKLE_FEATURES_FILE --pickle_features --tau TAU_VALUE --model_path PATH_TO_TRAINED_MODEL --teacher_flag (OPTIONAL)```
-
-- `--pickle_descriptor`: One or more file paths to pickles used as descriptors for the system
-- `--pickle_features`: One or more file paths to pickles used as features for the system
-- `--tau`: Time lag parameter (integer)
-- `--model_path`: Path to model trained on given descriptors and features
-- `--teacher_flag` : Optional flag to make predictions with teacher mode
-
-NOTE: you can add multiple pickle descriptors/features by adding additional `--pickle_descriptor` flags before additional paths to descriptors/features, ensure that the ordering is the same for descriptors and features 
 
 
 ### Dumping SFA Weights as B-Factors
