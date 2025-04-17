@@ -29,11 +29,11 @@ Alternatively, one can install msmbuilder2022 with pip by cloning the repository
 
 ``` pip install ./msmbuilder2022 ```
 
-2. **Clone the `md-sfa` repository to your local machine:**
-``` git clone https://github.com/svats73/md-sfa-msm.git ```
+2. **Clone the `mdml` repository to your local machine:**
+``` git clone https://github.com/svats73/mdml.git ```
 
 3. **Navigate to the cloned repository directory:**
-``` cd md-sfa-msm ```
+``` cd mdml ```
 
 4. **Install the custom `sklearnsfa` package:**
 ``` pip install ./sklearn-sfa ```
