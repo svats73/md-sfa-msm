@@ -38,7 +38,7 @@ Alternatively, one can install msmbuilder2022 with pip by cloning the repository
 4. **Install the custom `sklearnsfa` package:**
 ``` pip install ./sklearn-sfa ```
 
-5. **Install the `md_sfa` package:**
+5. **Install the `mdml` package:**
 ``` pip install . ```
 
 This installation process will ensure that you have both the `mdml` tool and the custom `sklearn-sfa` library installed and ready for your MD analysis tasks.
