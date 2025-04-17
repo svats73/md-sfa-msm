@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='md-sfa',
+    name='mdml',
     version='0.3.0',
     packages=find_packages(),
     install_requires=[
@@ -22,7 +22,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'md-sfa=md_sfa.cli:cli',
+            'mdml=mdml.cli:cli',
         ],
     },
 )

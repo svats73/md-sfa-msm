@@ -1,10 +1,10 @@
-# MD-SFA: Molecular Dynamics Slow Feature Analysis CLI Tool
+# MDML: Deep Learning for Molecular Simulation CLI 
 
 MDML is a software suite for dimensionality reduction, featurization, and analysis of Molecular Dynamics data. Our contributors are Shray Vats, Andreas Mardt, and Soumendranath Bhakat. The main point of contact for this repo is Shray Vats.
 
 ## Reference
 
-If you use ```mdml``` for published research, make sure to cite us:
+If you use `mdml` for published research, make sure to cite us:
 
 Generalizable Protein Dynamics in Serine-Threonine Kinases: Physics is the key
 Soumendranath Bhakat, Shray Vats, Andreas Mardt, Alexei Degterev
@@ -16,11 +16,11 @@ PLOS ONE 19(8): e0307226. https://doi.org/10.1371/journal.pone.0307226
 
 ## Overview
 
-MD-SFA is a powerful command-line interface (CLI) tool designed for the analysis of molecular dynamics (MD) simulations. Leveraging the capabilities of the `md_sfa` library, MD-SFA facilitates the loading of MD trajectory data, the featurization of trajectories, the execution of Slow Feature Analysis (SFA), and the creation of PLUMED files for biasing simulations based on SFA components. 
+MDML is a powerful command-line interface (CLI) tool designed for the analysis of molecular dynamics (MD) simulations. Leveraging the capabilities of`mdml` library, MDML facilitates the loading of MD trajectory data, the featurization of trajectories, the execution of Slow Feature Analysis (SFA) and Variational Autoencoding, and the creation of PLUMED files for biasing simulations based on SFA and VAE components. 
 
 ## Custom Installation
 
-Before installing MD-SFA, it is necessary to install a custom version of `sklearnsfa`, which is packaged within the `md-sfa` repository, as well as msmbuilder2022 found at https://github.com/msmbuilder/msmbuilder2022. This ensures compatibility and optimal performance for SFA computations within MD-SFA. Follow these steps to install both the custom `sklearnsfa` and `md-sfa`:
+Before installing MDML, it is necessary to install a custom version of `sklearnsfa`, which is packaged within the `mdml` repository, as well as msmbuilder2022 found at https://github.com/msmbuilder/msmbuilder2022. This ensures compatibility and optimal performance for SFA computations within MDML. Follow these steps to install both the custom `sklearnsfa` and `mdml`:
 
 1. **Install msmbuilder2022 using conda:**
 ``` conda install -c conda-forge testmsm ```
@@ -41,15 +41,15 @@ Alternatively, one can install msmbuilder2022 with pip by cloning the repository
 5. **Install the `md_sfa` package:**
 ``` pip install . ```
 
-This installation process will ensure that you have both the `md-sfa` tool and the custom `sklearn-sfa` library installed and ready for your MD analysis tasks.
+This installation process will ensure that you have both the `mdml` tool and the custom `sklearn-sfa` library installed and ready for your MD analysis tasks.
 
 ## Usage
 
-The MD-SFA CLI tool supports various commands for processing and analyzing your MD trajectories. Below is a guide to using these commands:
+The MDML CLI tool supports various commands for processing and analyzing your MD trajectories. Below is a guide to using these commands:
 
 ### Loading Trajectories
 
-``` md-sfa load-trajectories --path_to_trajectories PATH --topology_file FILE --stride N --atom_indices "selection" ```
+``` mdml load-trajectories --path_to_trajectories PATH --topology_file FILE --stride N --atom_indices "selection" ```
 
 - `--path_to_trajectories`: Directory containing trajectory files.
 - `--topology_file`: Topology file path.
@@ -58,66 +58,66 @@ The MD-SFA CLI tool supports various commands for processing and analyzing your 
 
 ### Featurizing Dihedrals
 
-``` md-sfa featurize --types TYPE1 --types TYPE2 --nosincos ```
+``` mdml featurize --types TYPE1 --types TYPE2 --nosincos ```
 
 - `--types`: Types of dihedrals to featurize. Can specify multiple types, such as chi1, chi2, phi, psi. `--types` must be put before each type input
 - `--nosincos`: Disables the sin/cos transformation if set.
 
 ### Describing Features
 
-``` md-sfa describe-features --nosincos ```
+``` mdml describe-features --nosincos ```
 
 - `--nosincos`: Disables the sin/cos transformation if set.
 
 ### Dumping Description
 
-``` md-sfa dump-description --description_file_path PATH --nosincos ```
+``` mdml dump-description --description_file_path PATH --nosincos ```
 
 - `--description_file_path`: File path to save the feature description.
 - `--nosincos`: Dump non-transformed feature description if created.
 
 ### Dumping Featurized Data
 
-``` md-sfa dump-featurized --dump_file_path PATH --nosincos ```
+``` mdml dump-featurized --dump_file_path PATH --nosincos ```
 
 - `--dump_file_path`: File path to save the featurized data.
 - `--nosincos`: Dump non-transformed features if created.
 
 ### Running Slow Feature Analysis (SFA)
 
-``` md-sfa run-sfa --n_components N --tau T ```
+``` mdml run-sfa --n_components N --tau T ```
 
 - `--n_components`: Number of SFA components to extract.
 - `--tau`: The tau parameter for SFA.
 
 ### Creating PLUMED File
 
-``` md-sfa create-plumed_file --plumed_filename FILENAME ```
+``` mdml create-plumed_file --plumed_filename FILENAME ```
 
 - `--plumed_filename`: File path to save the generated PLUMED file.
 
 ### Dumping SFA Components
 
-``` md-sfa dump-sfa-components --save_file FILE ```
+``` mdml dump-sfa-components --save_file FILE ```
 
 - `--save_file`: File path to save the SFA components.
 
 ### Cluster on SFA Components
 
-``` md-sfa cluster --algorithm ALGORITHM_NAME --n_clusters NUMBER_OF_CLUSTERS ```
+``` mdml cluster --algorithm ALGORITHM_NAME --n_clusters NUMBER_OF_CLUSTERS ```
 
 - `--algorithm`: Name of clustering algorithm to use (currently supporting 'kcenters', 'kmeans', and 'gmm')
 - `--n_clusters`: For 'kcenters' and 'kmeans', how many cluster centers to use (optional, unused for 'gmm')
 
 ### Dumping structures clustered on SFA Components
 
-``` md-sfa dump-clusters --num_samples NUMBER_OF_SAMPLES ```
+``` mdml dump-clusters --num_samples NUMBER_OF_SAMPLES ```
 
 - `--num_samples`: Number of structures to sample from cluster centers generated by clustering to be dumped
 
 ### Classify ensembles
 
-``` md-sfa classify --ensemble_one PATH_TO_FIRST_ENSEMBLES --ensemble_two PATH_TO_SECOND_ENSEMBLES --ensemble_features ```
+``` mdml classify --ensemble_one PATH_TO_FIRST_ENSEMBLES --ensemble_two PATH_TO_SECOND_ENSEMBLES --ensemble_features ```
 
 - `--ensemble_one`: Path to first featurized ensemble of trajectories
 - `--ensemble_two`: Path to second featurized ensemble of trajectories
@@ -125,14 +125,14 @@ The MD-SFA CLI tool supports various commands for processing and analyzing your 
 
 ### Dump classified ensembles as a plumed file
 
-``` md-sfa create-classifier-plumed --plumed_filename FILENAME ```
+``` mdml create-classifier-plumed --plumed_filename FILENAME ```
 
 - `--plumed_filename`: File path to save the generated PLUMED file.
 
 
 ### Dumping SFA Weights as B-Factors
 
-``` md-sfa plumed-bfactor --dat_file FILE --pdb_input PDB_INPUT_FILE --pdb_output PDB_OUTPUT_FILE ```
+``` mdml plumed-bfactor --dat_file FILE --pdb_input PDB_INPUT_FILE --pdb_output PDB_OUTPUT_FILE ```
 
 - `--dat_file`: File path containing saved SFA components.
 - `--pdb_input`: File path to PDB on which SFA weights will be dumped.
@@ -144,6 +144,6 @@ The MD-SFA CLI tool supports various commands for processing and analyzing your 
 
 To clear the current state and start fresh:
 
-``` md-sfa restart ```
+``` mdml restart ```
 
 This command deletes any serialized state, allowing you to start a new analysis without interference from previous runs.
